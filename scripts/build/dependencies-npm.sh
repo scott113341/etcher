@@ -106,11 +106,13 @@ if [ -n "$ARGV_PREFIX" ]; then
   fi
 
   pushd "$ARGV_PREFIX"
+  npm rebuild
   npm install $INSTALL_OPTS
   popd
 
   rm -f "$ARGV_PREFIX/package.json"
   rm -f "$ARGV_PREFIX/npm-shrinkwrap.json"
 else
+  npm rebuild
   npm install $INSTALL_OPTS
 fi

@@ -403,10 +403,8 @@ electron-develop:
 # will complain that your `node_modules` tree is not equal to what
 # is defined by the `npm-shrinkwrap.json` file, and will thus
 # refuse to do anything but install from scratch.
-# The `node_modules` directory also needs to be wiped out if you're
-# changing between target architectures, since compiled add-ons
-# will not work otherwise.
-	rm -rf node_modules
+# Also rebuild native modules if needed, when changing target architectures,
+# as binary add-ons will not work otherwise.
 	./scripts/build/dependencies-npm.sh \
 		-r "$(TARGET_ARCH)" \
 		-v "$(ELECTRON_VERSION)" \
