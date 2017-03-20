@@ -556,4 +556,133 @@ describe('Shared: DriveConstraints', function() {
 
   });
 
+  describe('.getDriveFeedback', function() {
+
+    describe('given there should be no errors or warnings', () => {
+
+      it('should return null', function() {
+        const result = constraints.getDriveFeedback({
+          device: '/dev/disk1',
+          mountpoints: [],
+          name: 'USB Drive',
+          size: 100000000100,
+          protected: false,
+          system: false
+        }, {
+          path: '/mnt/disk2/rpi.img',
+          size: 1000000000
+        });
+
+        m.chai.expect(result).to.equal(null);
+      });
+    });
+
+    describe('given the drive contains the image', () => {
+
+      it('should return the source error', function() {
+        const result = constraints.getDriveFeedback({
+          device: '/dev/disk1',
+          mountpoints: [ {
+            path: '/mnt/test'
+          } ],
+          name: 'USB Drive',
+          size: 100000000100
+        }, {
+          path: '/mnt/test/rpi.img',
+          size: 1000000000
+        });
+
+        m.chai.expect(result).to.deep.equal({
+          type: 'error',
+          message: 'Drive Contains Image'
+        });
+      });
+    });
+
+    describe('given the drive is a system drive', () => {
+
+      it('should return the system drive error', function() {
+        const result = constraints.getDriveFeedback({
+          device: '/dev/disk1',
+          mountpoints: [],
+          name: 'USB Drive',
+          size: 100000000100,
+          protected: false,
+          system: true
+        }, {
+          path: '/mnt/disk2/rpi.img',
+          size: 1000000000
+        });
+
+        m.chai.expect(result).to.deep.equal({
+          type: 'error',
+          message: 'System Drive'
+        });
+      });
+    });
+
+    describe('given the drive is too small', () => {
+
+      it('should return the too small error', function() {
+        const result = constraints.getDriveFeedback({
+          device: '/dev/disk1',
+          mountpoints: [],
+          name: 'USB Drive',
+          size: 10000000,
+          protected: false
+        }, {
+          path: '/mnt/disk2/rpi.img',
+          size: 1000000000
+        });
+
+        m.chai.expect(result).to.deep.equal({
+          type: 'error',
+          message: 'Too Small For Image'
+        });
+      });
+    });
+
+    describe('given the drive is locked', () => {
+
+      it('should return the locked drive error', function() {
+        const result = constraints.getDriveFeedback({
+          device: '/dev/disk1',
+          mountpoints: [],
+          name: 'USB Drive',
+          size: 100000000100,
+          protected: true
+        }, {
+          path: '/mnt/disk2/rpi.img',
+          size: 1000000000
+        });
+
+        m.chai.expect(result).to.deep.equal({
+          type: 'error',
+          message: 'Locked'
+        });
+      });
+    });
+
+    describe('given the drive is unrecommended size', () => {
+
+      it('should return the unrecommended size warning', function() {
+        const result = constraints.getDriveFeedback({
+          device: '/dev/disk1',
+          mountpoints: [],
+          name: 'USB Drive',
+          size: 1000000010
+        }, {
+          path: '/mnt/disk2/rpi.img',
+          size: 1000000000,
+          recommendedDriveSize: 2000000000
+        });
+
+        m.chai.expect(result).to.deep.equal({
+          type: 'warning',
+          message: 'Not Recommended'
+        });
+      });
+    });
+  });
+
 });
